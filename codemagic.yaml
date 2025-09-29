@@ -1,0 +1,32 @@
+workflows:
+  ios_debug_build:
+    name: iOS Debug (no codesign)
+    environment:
+      flutter: 3.24.0
+      xcode: 15.4           
+      java: 17
+    scripts:
+      - name: Show versions
+        script: |
+          flutter --version
+          ruby --version || true
+          pod --version || true
+      - name: Flutter clean & deps
+        script: |
+          flutter clean
+          flutter pub get
+      - name: CocoaPods install (fresh)
+        script: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod repo update
+          pod deintegrate || true
+          pod install
+          cd ..
+      - name: Build iOS (no codesign)
+        script: |
+          flutter build ios --debug --no-codesign
+    artifacts:
+      - build/ios/**/Debug-iphoneos/*.app
+      - build/ios/**/Debug-iphoneos/*.ipa
+      - build/**/reports/**/*
