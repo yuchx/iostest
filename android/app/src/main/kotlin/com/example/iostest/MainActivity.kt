@@ -1,4 +1,4 @@
-package com.example.iostest
+package infopublishofmeet
 
 import io.flutter.embedding.android.FlutterActivity
 
