@@ -1,0 +1,29 @@
+workflows:
+  ios_release_manualsign:
+    name: iOS Release (manual signing via UI)
+    environment:
+      flutter: 3.24.0
+      xcode: 15.4
+      vars:
+        EXPORT_METHOD: development   # 若你的 profile 是 Ad-Hoc 就改为 ad-hoc；App Store 就改为 app-store
+    scripts:
+      - name: Prepare Flutter deps
+        script: |
+          flutter clean
+          flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod repo update
+          pod install
+          cd ..
+
+      # ⚠️ 删除“Import signing assets”这整个步骤（不需要）
+      - name: Build signed IPA (Release)
+        script: |
+          flutter build ipa --release --export-method $EXPORT_METHOD
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/**/reports/**/*
