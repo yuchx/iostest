@@ -1,33 +1,29 @@
 workflows:
-  ios_debug_build:
-    name: iOS Debug (no codesign)
+  ios_release_manualsign:
+    name: iOS Release (manual signing via UI)
     environment:
       flutter: 3.24.0
-      xcode: 15.4           
-      java: 17
+      xcode: 15.4
+      vars:
+        EXPORT_METHOD: development   # 若你的 profile 是 Ad-Hoc 就改为 ad-hoc；App Store 就改为 app-store
     scripts:
-      - name: Show versions
-        script: |
-          flutter --version
-          ruby --version || true
-          pod --version || true
-      - name: Flutter clean & deps
+      - name: Prepare Flutter deps
         script: |
           flutter clean
           flutter pub get
-      - name: CocoaPods install (fresh)
+
+      - name: Install CocoaPods
         script: |
           cd ios
-          rm -rf Pods Podfile.lock
           pod repo update
-          pod deintegrate || true
           pod install
           cd ..
-      - name: Build iOS (no codesign)
-        script: |
-          flutter build ios --debug
-    artifacts:
-      - build/ios/**/Debug-iphoneos/*.app
-      - build/ios/**/Debug-iphoneos/*.ipa
-      - build/**/reports/**/*
 
+      # ⚠️ 删除“Import signing assets”这整个步骤（不需要）
+      - name: Build signed IPA (Release)
+        script: |
+          flutter build ipa --release --export-method $EXPORT_METHOD
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/**/reports/**/*
