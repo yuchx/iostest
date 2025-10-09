@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             InkWell(
               onTap: (){
-                configureAndConnect('119.167.71.25',1883,'6c4360ae-11db-4060-8313-63885d688b95');//连接MQTT
+                configureAndConnect('119.167.71.254',1883,'6c4360ae-11db-4060-8313-63885d688b95');//连接MQTT
               },
               child: Container(width: 100,height: 80,color: Colors.yellow,),
             )
