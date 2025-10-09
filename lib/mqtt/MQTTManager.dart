@@ -19,17 +19,17 @@ var mytimer;//MQTT发送心跳
 var myplayschtimer;//每S更新最后播放时间
 String locaPath = "";
 int certificate = 0;//0无证书 1有证书
-
+var deviceIdmq = '6c4360ae-11db-4060-8313-63885d688b95';
 
 
 
 MQTTAppState currentAppState = MQTTAppState();
 MQTTManager? manager;
-void configureAndConnect(urlMqtt,portMqttsd,clientIdT) {
+void configureAndConnect(urlMqtt,portMqttsd) {
   // TODO: Use UUID
   var portMqtt = int.parse('$portMqttsd');
   String osPrefix = 'Flutter${DateTime.now().millisecondsSinceEpoch}';
-  var mytopic = '/InfoPublish_DownTopic/$clientIdT';//没有证书的时候的topic
+  var mytopic = '/InfoPublish_DownTopic/$deviceIdmq';//没有证书的时候的topic
   manager = MQTTManager(
       host: urlMqtt,
       port: portMqtt,
@@ -159,77 +159,99 @@ class MQTTManager{
     double memoryPre = 1-(freememoryVal/memoryTotal);//剩余空间占总容量的百分比
     var diskPrememory = (memoryPre*100).toStringAsFixed(0);
 
+    var dataJson = {
+      "Memory":"$diskPrememory",
+      "Disk":"$diskPreDou",
+      "SysVolunme":0,
+    };
+    var sendData={
+      "ClientId":deviceIdmq,
+      "DataType":1,
+      "DataJson":dataJson
+    };
+
+    print(sendData);
+    Fluttertoast.showToast(msg: "MQTT发送心跳$sendData");
+    if(certificate==1){
+      var newsenddata = await jiamiasc(sendData);
+      String message = encodeBase64(json.encode(newsenddata));
+      publishMessage(message);
+    }else{
+      String message = encodeBase64(json.encode(sendData));
+      publishMessage(message);
+    }
+
     //看是否有deviceID
-    StorageUtil.getStringItem('deviceID').then((datares) async {
-      //发送过心跳
-      if(datares != null){
-        // print('发送注册完心跳');
-        var dataJson = {
-          "Memory":"$diskPrememory",
-          "Disk":"$diskPreDou",
-          "SysVolunme":0,
-        };
-        var sendData={
-          "ClientId":datares,
-          "DataType":1,
-          "DataJson":dataJson
-        };
-
-        print(sendData);
-        if(certificate==1){
-          var newsenddata = await jiamiasc(sendData);
-          String message = encodeBase64(json.encode(newsenddata));
-          publishMessage(message);
-        }else{
-          String message = encodeBase64(json.encode(sendData));
-          publishMessage(message);
-        }
-      }
-      else{
-        var deviceIDs = DeviceInfo['DeviceId'];
-        var deviceName =  DeviceInfo['DeviceName'];
-        var deviceVersion = DeviceInfo['DeviceVersion'];
-        var systemVersion = DeviceInfo['SystemVersion'];
-        Map register = (
-            {
-              "DeviceId":"",
-              "DeviceName":deviceName,
-              "IPAddress":ipsocket,
-              "MACAddress":deviceIDs,
-              "MachineCode":deviceIDs,
-              "SystemVersion":systemVersion,
-              "DeviceType":"2",
-              "DeviceVersion":deviceVersion,
-              "Memory":0,
-              "DiskFreeSize":0,
-              "Location":"",
-              "Width":0,
-              "Height":0,
-              "AuthorizationCode":devicecode,
-              "EncryptedSignatureData":"",
-              "TcpClientID":"",
-              "CurrentStickTime": getDataNowNtp().millisecondsSinceEpoch
-            }
-        );
-        Map sendData={
-          "ClientId":"",
-          "DataType":0,
-          "DataJson":register
-        };
-
-        if(certificate==1){
-          var newsenddata = await jiamiasc(sendData);
-          String message = encodeBase64(json.encode(newsenddata));
-          publishMessage(message);
-        }else{
-          String message = encodeBase64(json.encode(sendData));
-          publishMessage(message);
-        }
-
-        print(sendData);
-      }
-
-    });
+    // StorageUtil.getStringItem('deviceID').then((datares) async {
+    //   //发送过心跳
+    //   if(datares != null){
+    //     // print('发送注册完心跳');
+    //     var dataJson = {
+    //       "Memory":"$diskPrememory",
+    //       "Disk":"$diskPreDou",
+    //       "SysVolunme":0,
+    //     };
+    //     var sendData={
+    //       "ClientId":datares,
+    //       "DataType":1,
+    //       "DataJson":dataJson
+    //     };
+    //
+    //     print(sendData);
+    //     if(certificate==1){
+    //       var newsenddata = await jiamiasc(sendData);
+    //       String message = encodeBase64(json.encode(newsenddata));
+    //       publishMessage(message);
+    //     }else{
+    //       String message = encodeBase64(json.encode(sendData));
+    //       publishMessage(message);
+    //     }
+    //   }
+    //   else{
+    //     var deviceIDs = DeviceInfo['DeviceId'];
+    //     var deviceName =  DeviceInfo['DeviceName'];
+    //     var deviceVersion = DeviceInfo['DeviceVersion'];
+    //     var systemVersion = DeviceInfo['SystemVersion'];
+    //     Map register = (
+    //         {
+    //           "DeviceId":"",
+    //           "DeviceName":deviceName,
+    //           "IPAddress":ipsocket,
+    //           "MACAddress":deviceIDs,
+    //           "MachineCode":deviceIDs,
+    //           "SystemVersion":systemVersion,
+    //           "DeviceType":"2",
+    //           "DeviceVersion":deviceVersion,
+    //           "Memory":0,
+    //           "DiskFreeSize":0,
+    //           "Location":"",
+    //           "Width":0,
+    //           "Height":0,
+    //           "AuthorizationCode":devicecode,
+    //           "EncryptedSignatureData":"",
+    //           "TcpClientID":"",
+    //           "CurrentStickTime": getDataNowNtp().millisecondsSinceEpoch
+    //         }
+    //     );
+    //     Map sendData={
+    //       "ClientId":"",
+    //       "DataType":0,
+    //       "DataJson":register
+    //     };
+    //
+    //     if(certificate==1){
+    //       var newsenddata = await jiamiasc(sendData);
+    //       String message = encodeBase64(json.encode(newsenddata));
+    //       publishMessage(message);
+    //     }else{
+    //       String message = encodeBase64(json.encode(sendData));
+    //       publishMessage(message);
+    //     }
+    //
+    //     print(sendData);
+    //   }
+    //
+    // });
 
   }
 
