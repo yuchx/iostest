@@ -9,12 +9,8 @@ import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ntp/ntp.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:restart_app/restart_app.dart';
 import 'dart:io';
-import 'custom_channel.dart';
-import 'demo/localfileUseSetting.dart';
 import 'shareLocal.dart';
 import 'HttpHelper.dart';
 import 'package:uuid/uuid.dart';
@@ -748,7 +744,6 @@ void getLocalMess() async {
     if(nowplayschMess['scheduleID']==""){
       //只有是空的时候才是第一次进入APP
       StorageUtil.setStringItem('playschmess',"");//清空缓存里的值
-      sendplschtimeMess(sendlist);//上传缓存里的数值
     }
 
   }else{
@@ -810,67 +805,5 @@ DateTime getDataNowNtp(){
 DateTime gettimeNowNtp(){
   return DateTime.now().add(Duration(milliseconds: systimeDiff));
 }
-//校对时间
-Future<void> checkntpTime() async {
-  DateTime _myTime;
-  DateTime _ntpTime;
-  _myTime = DateTime.now();
-  if(NtpServer!=""){
-    final int offset = await NTP.getNtpOffset(localTime: _myTime, lookUpAddress: '$NtpServer');
-    systimeDiff = offset;//偏差的毫秒数
-    // _ntpTime = _myTime.add(Duration(milliseconds: offset));//NTP的时间
-    // print('My time: $_myTime');
-    // print('NTP time: $_ntpTime');
-    // print('Difference: ${_myTime.difference(_ntpTime).inMilliseconds}ms');
-  }else{
-    systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
-  }
 
-}
-//上传计划播放时长
-sendplschtimeMess(selist){
-  var posalUrlGetToken = 'http://$posalUrl:$posalport';
-  HttpDioHelper helper = HttpDioHelper();
-  var sendmess = {
-    'list':selist
-  };
-  helper.postUrlencodedDio(posalUrlGetToken, "/InfoPublish/RegisterPlayer/ProgramScheduleDetailSubmit",body:sendmess).then((datares) async {
-    if(datares.statusCode!=200){
-      String playsenderrmess = await StorageUtil.getStringItem('playsenderrmess');//之前没提交成功的播放时长的集合
-      if(playsenderrmess!=""&&playsenderrmess!="null"&&playsenderrmess!=null){
-        //如果之前不是空，则需要保存
-        var messplay = json.decode(playsenderrmess);
-        if(messplay.length>200){
-          messplay.removeRange(0, 100);//如果超过200条，就删100条
-        }
-        messplay..addAll(selist);//合并之前缓存里的数组和当前上传的数组
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsenderrmess', messjsonNowStr);//存在缓存里
-      }else{
-        //如果之前是空，则只需要保存本次没成功的数据
-        var messplay = selist;
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsenderrmess', messjsonNowStr);//存在缓存里
-      }
-    }else{
-      //上传成功，保存在上传成功后的播放时长集合里
-      String? playsdsucmess = await StorageUtil.getStringItem('playsdsucmess');//之前提交成功的播放时长的集合
-      if(playsdsucmess!=""&&playsdsucmess!="null"&&playsdsucmess!=null){
-        //如果之前不是空，则需要保存
-        var messplay = json.decode(playsdsucmess);
-        if(messplay.length>200){
-          messplay.removeRange(0, 100);//如果超过200条，就删100条
-        }
-        messplay..addAll(selist);//合并之前缓存里的数组和当前上传的数组
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsdsucmess', messjsonNowStr);//存在缓存里
-      }else{
-        //如果之前是空，则只需要保存本次没成功的数据
-        var messplay = selist;
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsdsucmess', messjsonNowStr);//存在缓存里
-      }
-    }
-  });
-}
 
