@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     getMessageLogin('6c4360ae-11db-4060-8313-63885d688b95','http://172.16.10.211:9002');
 
-    configureAndConnect('119.167.71.25',1883,'6c4360ae-11db-4060-8313-63885d688b95');//连接MQTT
+
   }
 
   @override
@@ -105,6 +105,12 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            InkWell(
+              onTap: (){
+                configureAndConnect('119.167.71.25',1883,'6c4360ae-11db-4060-8313-63885d688b95');//连接MQTT
+              },
+              child: Container(width: 100,height: 80,color: Colors.yellow,),
+            )
           ],
         ),
       ),

@@ -28,17 +28,8 @@ MQTTManager? manager;
 void configureAndConnect(urlMqtt,portMqttsd,clientIdT) {
   // TODO: Use UUID
   var portMqtt = int.parse('$portMqttsd');
-  String osPrefix = 'Flutter${getDataNowNtp().millisecondsSinceEpoch}';
+  String osPrefix = 'Flutter${DateTime.now().millisecondsSinceEpoch}';
   var mytopic = '/InfoPublish_DownTopic/$clientIdT';//没有证书的时候的topic
-  if(certificate==1){
-    var beesmart_key = md5.convert(utf8.encode("tonle-InfoPW")).toString();//写死的跟后台统一的固定头
-    var cltidmdval =md5.convert(utf8.encode("$clientIdT")).toString();
-    var maxsmkey = beesmart_key.toUpperCase();//转换成大写
-    var maxcltidmd = cltidmdval.toUpperCase();//转换成大写
-    mytopic = "/InfoPublish_DownTopic/$maxsmkey/$maxcltidmd";//有证书时的topic
-  }else{
-    mytopic = '/InfoPublish_DownTopic/$clientIdT';//没有证书的时候的topic
-  }
   manager = MQTTManager(
       host: urlMqtt,
       port: portMqtt,
@@ -105,6 +96,7 @@ class MQTTManager{
     }catch (e) {
       //出现异常 证书配置语法方面的错误
       print("SecurityContext set  error : " + e.toString());
+      Fluttertoast.showToast(msg: "证书配置错误$e");
       deviceLogAdd(-1,"证书配置错误$e",'证书配置错误$e');
       return -1;
     }
@@ -120,7 +112,7 @@ class MQTTManager{
     assert(_client != null);
     try {
       print('EXAMPLE::Mosquitto start client connecting....');
-      await _client?.connect('$MqttUser','$MqttPassword');//需要传递用户名和密码
+      await _client?.connect('admin','public');//需要传递用户名和密码
       print('成功');
       Fluttertoast.showToast(msg: "MQTT连接成功");
       deviceLogAdd('1', 'MQTT连接成功', 'MQTT连接成功');
@@ -131,7 +123,7 @@ class MQTTManager{
       startTimer();
 
     } catch(e) {
-
+      Fluttertoast.showToast(msg: "MQTT连接失败connect");
       disconnect();
     }
   }
