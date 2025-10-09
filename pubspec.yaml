@@ -37,6 +37,15 @@ dependencies:
   cupertino_icons: ^1.0.8
   dio: 5.7.0
   fluttertoast: 8.2.10
+  #添加mqtt的依赖
+  mqtt_client: 10.5.1
+  #  mqtt加解密
+  encrypt: 5.0.3
+  external_path: 1.0.3
+  uuid: 4.5.1
+  device_info_plus: 9.1.2
+  path_provider: 2.1.5
+  shared_preferences: 2.3.4
 
 dev_dependencies:
   flutter_test:

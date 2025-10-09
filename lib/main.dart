@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'mqtt/MQTTManager.dart';
 import 'httptest.dart';
 
 void main() {
@@ -69,6 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
     getMessageLogin('6c4360ae-11db-4060-8313-63885d688b95','http://172.16.10.211:9002');
+
+    configureAndConnect('119.167.71.25',1883,'6c4360ae-11db-4060-8313-63885d688b95');//连接MQTT
   }
 
   @override
